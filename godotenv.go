@@ -1,20 +1,8 @@
-// Package godotenv is a go port of the ruby dotenv library (https://github.com/bkeepers/dotenv)
-//
-// Examples/readme can be found on the GitHub page at https://github.com/joho/godotenv
-//
-// The TL;DR is that you make a .env file that looks something like
-//
-//	SOME_ENV_VAR=somevalue
-//
-// and then in your go code you can call
-//
-//	godotenv.Load()
-//
-// and all the env vars declared in .env will be available through os.Getenv("SOME_ENV_VAR")
 package godotenv
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -26,7 +14,6 @@ import (
 
 const doubleQuoteSpecialChars = "\\\n\r\"!$`"
 
-// Parse reads an env file from io.Reader, returning a map of keys and values.
 func Parse(r io.Reader) (map[string]string, error) {
 	var buf bytes.Buffer
 	_, err := io.Copy(&buf, r)
@@ -37,17 +24,15 @@ func Parse(r io.Reader) (map[string]string, error) {
 	return UnmarshalBytes(buf.Bytes())
 }
 
-// Load will read your env file(s) and load them into ENV for this process.
-//
-// Call this function as close as possible to the start of your program (ideally in main).
-//
-// If you call Load without any args it will default to loading .env in the current path.
-//
-// You can otherwise tell it which files to load (there can be more than one) like:
-//
-//	godotenv.Load("fileone", "filetwo")
-//
-// It's important to note that it WILL NOT OVERRIDE an env variable that already exists - consider the .env file to set dev vars or sensible defaults.
+func LoadEnv() (err error) {
+	err = loadFile("./.env", false)
+	if err != nil {
+		return errors.New("Error loading env variables")
+	}
+	return
+}
+
+
 func Load(filenames ...string) (err error) {
 	filenames = filenamesOrDefault(filenames)
 
@@ -186,7 +171,6 @@ func loadFile(filename string, overload bool) error {
 	if err != nil {
 		return err
 	}
-
 	currentEnv := map[string]bool{}
 	rawEnv := os.Environ()
 	for _, rawEnvLine := range rawEnv {
