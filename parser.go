@@ -46,7 +46,6 @@ func parseBytes(src []byte, out map[string]string) error {
 }
 
 // getStatementPosition returns position of statement begin.
-//
 // It skips any comment line or non-whitespace character.
 func getStatementStart(src []byte) []byte {
 	pos := indexOfNonSpaceChar(src)
@@ -173,8 +172,6 @@ func extractVarValue(src []byte, vars map[string]string) (value string, rest []b
 		trimFunc := isCharFunc(rune(quote))
 		value = string(bytes.TrimLeftFunc(bytes.TrimRightFunc(src[0:i], trimFunc), trimFunc))
 		if quote == prefixDoubleQuote {
-			// unescape newlines for double quote (this is compat feature)
-			// and expand environment variables
 			value = expandVariables(expandEscapes(value), vars)
 		}
 
@@ -232,7 +229,6 @@ func isCharFunc(char rune) func(rune) bool {
 }
 
 // isSpace reports whether the rune is a space character but not line break character
-//
 // this differs from unicode.IsSpace, which also applies line break as space
 func isSpace(r rune) bool {
 	switch r {

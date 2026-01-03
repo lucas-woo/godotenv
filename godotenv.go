@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,31 +44,9 @@ func Load(filenames ...string) (err error) {
 	return
 }
 
-// Overload will read your env file(s) and load them into ENV for this process.
-//
-// Call this function as close as possible to the start of your program (ideally in main).
-//
-// If you call Overload without any args it will default to loading .env in the current path.
-//
-// You can otherwise tell it which files to load (there can be more than one) like:
-//
-//	godotenv.Overload("fileone", "filetwo")
-//
-// It's important to note this WILL OVERRIDE an env variable that already exists - consider the .env file to forcefully set all vars.
-func Overload(filenames ...string) (err error) {
-	filenames = filenamesOrDefault(filenames)
 
-	for _, filename := range filenames {
-		err = loadFile(filename, true)
-		if err != nil {
-			return // return early on a spazout
-		}
-	}
-	return
-}
 
-// Read all env (with same file loading semantics as Load) but return values as
-// a map rather than automatically writing values into env
+
 func Read(filenames ...string) (envMap map[string]string, err error) {
 	filenames = filenamesOrDefault(filenames)
 	envMap = make(map[string]string)
@@ -90,12 +67,10 @@ func Read(filenames ...string) (envMap map[string]string, err error) {
 	return
 }
 
-// Unmarshal reads an env file from a string, returning a map of keys and values.
 func Unmarshal(str string) (envMap map[string]string, err error) {
 	return UnmarshalBytes([]byte(str))
 }
 
-// UnmarshalBytes parses env file from byte slice of chars, returning a map of keys and values.
 func UnmarshalBytes(src []byte) (map[string]string, error) {
 	out := make(map[string]string)
 	err := parseBytes(src, out)
@@ -103,49 +78,9 @@ func UnmarshalBytes(src []byte) (map[string]string, error) {
 	return out, err
 }
 
-// Exec loads env vars from the specified filenames (empty map falls back to default)
-// then executes the cmd specified.
-//
-// Simply hooks up os.Stdin/err/out to the command and calls Run().
-//
-// If you want more fine grained control over your command it's recommended
-// that you use `Load()`, `Overload()` or `Read()` and the `os/exec` package yourself.
-func Exec(filenames []string, cmd string, cmdArgs []string, overload bool) error {
-	op := Load
-	if overload {
-		op = Overload
-	}
-	if err := op(filenames...); err != nil {
-		return err
-	}
 
-	command := exec.Command(cmd, cmdArgs...)
-	command.Stdin = os.Stdin
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	return command.Run()
-}
 
-// Write serializes the given environment and writes it to a file.
-func Write(envMap map[string]string, filename string) error {
-	content, err := Marshal(envMap)
-	if err != nil {
-		return err
-	}
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	_, err = file.WriteString(content + "\n")
-	if err != nil {
-		return err
-	}
-	return file.Sync()
-}
 
-// Marshal outputs the given environment as a dotenv-formatted environment file.
-// Each line is in the format: KEY="VALUE" where VALUE is backslash-escaped.
 func Marshal(envMap map[string]string) (string, error) {
 	lines := make([]string, 0, len(envMap))
 	for k, v := range envMap {
