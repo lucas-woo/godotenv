@@ -1,4 +1,4 @@
-Thank you Mr. John Barton and the squad 
+Thank you Mr. John Barton (joho)
 
 This was published for me to use in my other repos.
 
@@ -39,4 +39,3 @@ func main() {
 }
 
 ```
-https://github.com/joho
