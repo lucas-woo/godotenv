@@ -1,5 +1,7 @@
 Thank you Mr. John Barton 
 
+This was published for me to use in my other repos.
+To load environment variables in your go projects: 
 ```bash
 go get github.com/lucas-woo/godotenv
 ```
