@@ -1,6 +1,4 @@
-Thank you Mr. John Barton (joho)
-
-This was published for me to use in my other repos.
+Thank you joho,
 
 To load environment variables in your go projects: 
 
